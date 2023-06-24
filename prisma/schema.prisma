@@ -11,8 +11,156 @@ datasource db {
 }
 
 model User {
-  id      String  @id @default(uuid())
-  name    String  @db.VarChar(255)
-  email   String  @db.VarChar(255)
-  isAdmin Boolean @default(false)
+  id            String  @id @default(uuid())
+  name          String? @db.VarChar(255)
+  email         String  @db.VarChar(255)
+  password      String  @db.VarChar(255)
+  isAdmin       Boolean @default(false)
+  spendingLimit BigInt?
+
+  FinancialAccount FinancialAccount[]
+  Category         Category[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+enum TypeCategory {
+  EARNING
+  EXPENSE
+}
+
+model Color {
+  id       String     @id @db.VarChar(255)
+  hexColor String     @db.VarChar(255)
+  name     String     @db.VarChar(255)
+  Category Category[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+
+  @@unique([id, hexColor])
+}
+
+enum SourceRevenueTypeEnum {
+  WAGE
+  INVESTMENT
+  DONATION
+  OTHERS
+}
+
+model Revenue {
+  id    String                @id @default(uuid())
+  type  SourceRevenueTypeEnum @default(OTHERS)
+  value BigInt
+
+  entryDate       DateTime @default(now())
+  entryMountIndex Int
+  entryYearIndex  Int
+
+  description String? @db.VarChar(255)
+  received    Boolean @default(true)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  financialAccountId String           @db.VarChar(225)
+  financialAccount   FinancialAccount @relation(fields: [financialAccountId], references: [id])
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  type        TypeCategory
+  name        String       @db.VarChar(255)
+  description String       @db.VarChar(255)
+  isDefault   Boolean      @default(false)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  colorId String @db.VarChar(255)
+  color   Color  @relation(fields: [colorId], references: [id])
+
+  Revenue  Revenue[]
+  Expenses Expenses[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+
+  @@unique([id, userId])
+}
+
+enum PaymentMethodTypes {
+  CREDIT_CARD
+  DEBIT_CARD
+  TICKET
+  PIX
+  LOAN
+  MONEY
+  FINANCING
+  OUTHERS
+}
+
+model Expenses {
+  id                String             @id @db.VarChar(255)
+  paymentMethodType PaymentMethodTypes @default(MONEY)
+  value             BigInt
+  description       String?            @db.VarChar(255)
+
+  purchaseDate       DateTime @default(now()) @db.Timestamptz(3)
+  purchaseMountIndex Int
+  purchaseYearIndex  Int
+
+  paid Boolean @default(false)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  creditCardId String?
+  creditCard   CreditCard? @relation(fields: [creditCardId], references: [id])
+
+  financialAccountId String
+  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id])
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model CreditCard {
+  id            String     @id @default(uuid())
+  totalLimit    BigInt     @default(0)
+  name          String     @db.VarChar(255)
+  closingDay    Int
+  expirationDay Int
+  Expenses      Expenses[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+enum FinancialAccountTypeEnum {
+  CHECKING_ACCOUNT
+  SAVINGS_ACCOUNT
+  WALLET
+  INVESTMENT
+  OUTHERS
+}
+
+model FinancialAccount {
+  id          String  @id @default(uuid())
+  description String? @db.VarChar(255)
+
+  financialAccountType FinancialAccountTypeEnum @default(WALLET)
+
+  userId String
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  Revenue  Revenue[]
+  Expenses Expenses[]
+
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
 }
