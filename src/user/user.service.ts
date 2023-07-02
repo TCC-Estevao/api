@@ -13,6 +13,7 @@ export class UserService {
         email: createUserDto.email,
       },
     });
+    console.log();
     if (existentUser)
       throw new ConflictException('Já existe um usuário com esse email');
 
