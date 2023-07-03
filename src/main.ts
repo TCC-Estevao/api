@@ -13,7 +13,7 @@ async function bootstrap() {
     }),
   );
   await app.listen(3000, () => {
-    console.log('Está rodando');
+    console.log('Listening on port 3000');
   });
 }
 
