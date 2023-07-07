@@ -20,7 +20,7 @@ export class AuthService {
       name,
       isAdmin,
       spendingLimit,
-      id,
+      sub: id,
     };
     const jwtToken = this.jwtService.sign(payload);
 
