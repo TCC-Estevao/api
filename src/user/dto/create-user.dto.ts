@@ -6,9 +6,8 @@ export class CreateUserDto extends User {
   email: string;
 
   @IsString()
-  @MinLength(4)
   @Matches(/((?=.*\d)(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).{8,}$/, {
-    message: 'password too weak',
+    message: 'Senha muito fraca',
   })
   password: string;
 
